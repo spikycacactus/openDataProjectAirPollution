@@ -1,4 +1,11 @@
 # source https://www.kaggle.com/datasets/adityaramachandran27/world-air-quality-index-by-city-and-coordinates/data
+import cartopy.crs as ccrs
+import matplotlib.pyplot as plt
+
+import tkinter
+ax = plt.axes(projection=ccrs.PlateCarree())
+ax.coastlines()
+
 
 with open('airpollution.csv') as f:
     f.readline()
@@ -26,7 +33,16 @@ for riadok in udaje:
     PM2_5_AQI_category = aktualne[11]
     lat = float(aktualne[12])
     lng = float(aktualne[13])
-
+    if AQI_category == 'Good':
+        plt.plot(lng, lat, marker='o', color='green', markersize=1, transform=ccrs.PlateCarree())
+    if AQI_category == 'Moderate':
+        plt.plot(lng, lat, marker='o', color='yellow', markersize=1, transform=ccrs.PlateCarree())
+    if AQI_category == 'Unhealthy':
+        plt.plot(lng, lat, marker='o', color='red', markersize=1, transform=ccrs.PlateCarree())
+    if AQI_category == 'Very Unhealthy':
+        plt.plot(lng, lat, marker='o', color='black', markersize=1, transform=ccrs.PlateCarree())
+    if AQI_category == 'Unhealthy for Sensitive Groups':
+        plt.plot(lng, lat, marker='o', color='orange', markersize=1, transform=ccrs.PlateCarree())
     # rata kolko stanic je v danej krajine
     if country not in stations_in_countries:
         stations_in_countries[country] = 1
@@ -51,3 +67,4 @@ print(average_AQI_in_country)
 print(least_polluted_cities)
 print(stations_in_countries)
 print(AQI_in_countries)
+plt.show()
