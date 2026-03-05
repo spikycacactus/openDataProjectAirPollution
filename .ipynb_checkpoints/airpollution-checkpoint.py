@@ -1,7 +1,17 @@
 # source https://www.kaggle.com/datasets/adityaramachandran27/world-air-quality-index-by-city-and-coordinates/data
-import tkinter
+import matplotlib.pyplot as plt
+import cartopy.crs as ccrs
+import cartopy.feature as cfeature
 
+fig = plt.figure()
+ax = plt.axes(projection=ccrs.PlateCarree())
 
+ax.add_feature(cfeature.LAND)
+ax.add_feature(cfeature.OCEAN)
+ax.add_feature(cfeature.BORDERS)
+ax.add_feature(cfeature.COASTLINE)
+
+plt.show()
 with open('airpollution.csv') as f:
     f.readline()
     udaje = f.read().strip().split("\n")
@@ -28,6 +38,7 @@ for riadok in udaje:
     PM2_5_AQI_category = aktualne[11]
     lat = float(aktualne[12])
     lng = float(aktualne[13])
+
     # rata kolko stanic je v danej krajine
     if country not in stations_in_countries:
         stations_in_countries[country] = 1
