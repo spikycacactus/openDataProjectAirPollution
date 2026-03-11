@@ -14,7 +14,7 @@ with open('airpollution.csv') as f:
     udaje = f.read().strip().split("\n")
 
 def world_map():
-    ax.set_extent([67, 98, 5, 38])
+    #ax.set_extent([67, 98, 5, 38])
     for riadok in udaje:
         aktualne = riadok.split(',')
         country = aktualne[0]
@@ -34,13 +34,13 @@ def world_map():
         if AQI_category == 'Good':
             plt.plot(lng, lat, marker='o', color='green', markersize=1, transform=ccrs.PlateCarree())
         if AQI_category == 'Moderate':
-            plt.plot(lng, lat, marker='o', color='yellow', markersize=1, transform=ccrs.PlateCarree())
+            plt.plot(lng, lat, marker='o', color='orange', markersize=1, transform=ccrs.PlateCarree())
         if AQI_category == 'Unhealthy':
             plt.plot(lng, lat, marker='o', color='red', markersize=1, transform=ccrs.PlateCarree())
         if AQI_category == 'Very Unhealthy':
             plt.plot(lng, lat, marker='o', color='black', markersize=1, transform=ccrs.PlateCarree())
         if AQI_category == 'Unhealthy for Sensitive Groups':
-            plt.plot(lng, lat, marker='o', color='orange', markersize=1, transform=ccrs.PlateCarree())
+            plt.plot(lng, lat, marker='o', color='yellow', markersize=1, transform=ccrs.PlateCarree())
 
 # Europe if 35<=lat<=72 and -25<=lng<=40:
 # Africa	if 35<=lat<=35 and 20<=lng<=55:
@@ -60,18 +60,18 @@ def draw():
         PM2_5_AQI_category = aktualne[11]
         lat = float(aktualne[12])
         lng = float(aktualne[13])
-        teraz = NO2_AQI_category
-        if 35<=lat<=72 and -25<=lng<=40:
+        teraz = AQI_category
+        if 10<=lat<=80 and 25<=lng<=180:
             if teraz == 'Good':
                 plt.plot(lng, lat, marker='o', color='green', markersize=1, transform=ccrs.PlateCarree())
             if teraz == 'Moderate':
-                plt.plot(lng, lat, marker='o', color='yellow', markersize=1, transform=ccrs.PlateCarree())
+                plt.plot(lng, lat, marker='o', color='orange', markersize=1, transform=ccrs.PlateCarree())
             if teraz == 'Unhealthy':
                 plt.plot(lng, lat, marker='o', color='red', markersize=1, transform=ccrs.PlateCarree())
             if teraz == 'Very Unhealthy':
                 plt.plot(lng, lat, marker='o', color='black', markersize=1, transform=ccrs.PlateCarree())
             if teraz == 'Unhealthy for Sensitive Groups':
-                plt.plot(lng, lat, marker='o', color='orange', markersize=1, transform=ccrs.PlateCarree())
+                plt.plot(lng, lat, marker='o', color='yellow', markersize=1, transform=ccrs.PlateCarree())
 draw()
 print('ok')
 plt.savefig("world.png")
