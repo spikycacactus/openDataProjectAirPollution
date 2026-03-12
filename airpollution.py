@@ -1,7 +1,7 @@
 # source https://www.kaggle.com/datasets/adityaramachandran27/world-air-quality-index-by-city-and-coordinates/data
 import tkinter
-
-
+cnv = tkinter.Canvas(bg='white', width=400, height=500) #nezabudnúť veľké C v Canvas
+cnv.pack()
 with open('airpollution.csv') as f:
     f.readline()
     udaje = f.read().strip().split("\n")
@@ -52,3 +52,9 @@ print(average_AQI_in_country)
 print(least_polluted_cities)
 print(stations_in_countries)
 print(AQI_in_countries)
+lb = tkinter.Listbox(selectmode='multiple', width=10,height=15)
+lb.pack()
+lb.insert(0, 'Toto vkladam na zaciatok (vrch) listboxu')
+
+cnv.mainloop()
+
