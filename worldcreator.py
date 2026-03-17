@@ -3,7 +3,6 @@ import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
 import cartopy.feature as cfeature
 
-import tkinter
 ax = plt.axes(projection=ccrs.PlateCarree())
 ax.coastlines()
 ax.add_feature(cfeature.BORDERS)
