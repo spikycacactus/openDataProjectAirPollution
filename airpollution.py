@@ -83,14 +83,20 @@ def draw(co, minlat, minlng, maxlat, maxlng):
     for value in climate:
         dokopy_stanic += len(climate[value]['coords']) // 2
         plt.scatter(climate[value]['coords'][::2], climate[value]['coords'][1::2], color=climate[value]['color'], s=1, transform=ccrs.PlateCarree())
-    plt.show()
-    posledne=0
     cnv.delete("all")
+    posledne=0
+    x = 0
+    y = 0
     for typ in climate:
         percenta=(len(climate[typ]['coords'])/2) / dokopy_stanic
-        print(percenta, len(climate[typ]['coords'])/2, dokopy_stanic)
-        cnv.create_arc(50, 50, 150, 150, start=posledne, extent=percenta * 360, fill=climate[typ]['color'])
-        posledne = percenta * 360
+        if percenta == 1:
+            cnv.create_oval(25, 25, 150, 150, fill=climate[typ]['color'])
+            return
+        else:
+            cnv.create_arc(25, 25, 150, 150, start=posledne, extent=percenta * 360, fill=climate[typ]['color'], outline="")
+
+        posledne += percenta * 360
+    plt.show()
     # kresli graf
 
 regions = {
@@ -117,6 +123,7 @@ def spusti():
     currentregion = lb.get(index_region)
     typ = lb2.curselection()[0]
     co = lb2.get(typ)
+    print(type[co])
     draw(type[co], regions[currentregion][0], regions[currentregion][1], regions[currentregion][2],regions[currentregion][3])
 
 #spravi tlacidlo
@@ -133,5 +140,7 @@ for typ in type:
     lb2.insert(tkinter.END, typ)
 lb2.grid(column=0,row=1)
 
+lb.selection_set(0)   # vyberie "World"
+lb2.selection_set(0)  # vyberie prvý typ
 
 cnv.mainloop()
