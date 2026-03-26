@@ -1,9 +1,11 @@
 # source https://www.kaggle.com/datasets/adityaramachandran27/world-air-quality-index-by-city-and-coordinates/data
+from operator import index
+
 import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
 import cartopy.feature as cfeature
 import tkinter
-cnv = tkinter.Canvas(bg='white', width=500, height=200)
+cnv = tkinter.Canvas(bg='white', width=500, height=300)
 cnv.grid(column=1,row=0)
 
 #country = aktualne[0]
@@ -35,15 +37,19 @@ def draw(co, minlat, minlng, maxlat, maxlng):
         'Moderate':{'coords' : [], 'color' : 'orange'},
         'Unhealthy':{'coords' : [], 'color' : 'red'},
         'Very Unhealthy':{'coords' : [], 'color' : 'black'},
-        'Unhealthy for Sensitive Groups':{'coords' : [], 'color' : 'yellow'},
+        'Unhealthy for Sensitive Groups':{'coords' : [], 'color' : 'blue'},
         'Hazardous':{'coords' : [], 'color' : 'purple'},
     }
 
     # bunusove listy
+    least_poll = []
+    least_poll_v = []
+    least_pollutted_cities = []
     stations_in_countries = {}
-    least_polluted_cities = {}
+    #least_polluted_cities = {}
     AQI_in_countries = {}
     average_AQI_in_country = {}
+
     for riadok in udaje:
         # udaje co potrebujeme
         aktualne = riadok.split(',')
@@ -64,8 +70,15 @@ def draw(co, minlat, minlng, maxlat, maxlng):
                 stations_in_countries[country] += 1
 
             # least polluted cities
-            if AQI_value <= 10:
-                least_polluted_cities[city] = AQI_value
+            if len(least_poll) < 10:
+                least_poll.append(int(aktualne[co-1]))
+                least_poll_v.append(city)
+            if int(aktualne[co-1]) < max(least_poll):
+                ind = least_poll.index(max(least_poll))
+                least_poll[ind] = int(aktualne[co-1])
+                least_poll_v[ind] = city
+
+            #least_polluted_cities[city] = int(aktualne[co-1])
 
             # countries by pollution per city
             if country not in AQI_in_countries:
@@ -75,10 +88,13 @@ def draw(co, minlat, minlng, maxlat, maxlng):
     for country in AQI_in_countries:
         average = AQI_in_countries[country] // stations_in_countries[country]
         average_AQI_in_country[country] = average
-    print(average_AQI_in_country)
-    print(least_polluted_cities)
-    print(stations_in_countries)
-    print(AQI_in_countries)
+    for i in range(len(least_poll)):
+        least_pollutted_cities.append((least_poll[i], least_poll_v[i]))
+    #print(average_AQI_in_country)
+    #sortne najmenej polluted cities
+    least_pollutted_cities.sort()
+    #print(stations_in_countries)
+    #print(AQI_in_countries)
     dokopy_stanic = 0
     for value in climate:
         dokopy_stanic += len(climate[value]['coords']) // 2
@@ -86,16 +102,29 @@ def draw(co, minlat, minlng, maxlat, maxlng):
     cnv.delete("all")
     posledne=0
     x = 0
-    y = 0
+    y = 150
+    # kresli graf poctu stanic a legendu
     for typ in climate:
+        y+=15
+        kolko = len(climate[typ]['coords'])//2
         percenta=(len(climate[typ]['coords'])/2) / dokopy_stanic
         if percenta == 1:
-            cnv.create_oval(25, 25, 150, 150, fill=climate[typ]['color'])
+            cnv.create_oval(25, 25, 150, 150, fill=climate[typ]['color'], outline='')
+            cnv.create_text(10, y, fill=climate[typ]['color'], text = 'Only Good' +': ' + str(kolko), anchor = 'w')
             return
         else:
             cnv.create_arc(25, 25, 150, 150, start=posledne, extent=percenta * 360, fill=climate[typ]['color'], outline="")
-
         posledne += percenta * 360
+        if typ == 'Unhealthy for Sensitive Groups':
+            cnv.create_text(10, y, fill=climate[typ]['color'], text = 'Unhealthy for Senstive' +': ' + str(kolko), anchor = 'w')
+        else:
+            cnv.create_text(10, y, fill=climate[typ]['color'], text= typ + ': ' + str(kolko), anchor='w')
+    y = 10
+    for i in range(len(least_pollutted_cities)):
+        y+=15
+        cnv.create_text(200, y, fill='black', text=least_pollutted_cities[i][1] + ': ' + str(least_pollutted_cities[i][0]), anchor='w')
+
+
     plt.show()
     # kresli graf
 
@@ -123,7 +152,6 @@ def spusti():
     currentregion = lb.get(index_region)
     typ = lb2.curselection()[0]
     co = lb2.get(typ)
-    print(type[co])
     draw(type[co], regions[currentregion][0], regions[currentregion][1], regions[currentregion][2],regions[currentregion][3])
 
 #spravi tlacidlo
@@ -138,7 +166,7 @@ lb.grid(column=0,row=0)
 lb2 = tkinter.Listbox(exportselection=False,selectmode='single', width=10,height=10)
 for typ in type:
     lb2.insert(tkinter.END, typ)
-lb2.grid(column=0,row=1)
+lb2.grid(column=3,row=0)
 
 lb.selection_set(0)   # vyberie "World"
 lb2.selection_set(0)  # vyberie prvý typ
