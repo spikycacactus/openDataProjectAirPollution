@@ -1,11 +1,13 @@
 # source https://www.kaggle.com/datasets/adityaramachandran27/world-air-quality-index-by-city-and-coordinates/data
 from operator import index
-
 import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
 import cartopy.feature as cfeature
 import tkinter
-cnv = tkinter.Canvas(bg='white', width=500, height=300)
+from ttkwidgets.autocomplete import AutocompleteCombobox
+
+root = tkinter.Tk()
+cnv = tkinter.Canvas(root, bg='white', width=500, height=300)
 cnv.grid(column=1,row=0)
 
 #country = aktualne[0]
@@ -42,11 +44,15 @@ def draw(co, minlat, minlng, maxlat, maxlng):
     }
 
     # bunusove listy
+    # least_polluted_cities
     least_poll = []
     least_poll_v = []
     least_pollutted_cities = []
+    # most polluted cities
+    most_poll = []
+    most_poll_v = []
+    most_pollutted_cities = []
     stations_in_countries = {}
-    #least_polluted_cities = {}
     AQI_in_countries = {}
     average_AQI_in_country = {}
 
@@ -69,16 +75,23 @@ def draw(co, minlat, minlng, maxlat, maxlng):
             elif country in stations_in_countries:
                 stations_in_countries[country] += 1
 
-            # least polluted cities
+            # least polluted cities, vytvori zoznam desiatich miest a ich hodnot a nahradza ich ked maju mensie znecistenie
             if len(least_poll) < 10:
                 least_poll.append(int(aktualne[co-1]))
                 least_poll_v.append(city)
-            if int(aktualne[co-1]) < max(least_poll):
+            elif int(aktualne[co-1]) < max(least_poll):
                 ind = least_poll.index(max(least_poll))
                 least_poll[ind] = int(aktualne[co-1])
                 least_poll_v[ind] = city
 
-            #least_polluted_cities[city] = int(aktualne[co-1])
+            # most polluted cities, vytvori zoznam desiatich miest a ich hodnot a nahradza ich ked maju vacsie znecistenie
+            if len(most_poll) < 10:
+                most_poll.append(int(aktualne[co-1]))
+                most_poll_v.append(city)
+            elif int(aktualne[co-1]) > min(most_poll):
+                ind = most_poll.index(min(most_poll))
+                most_poll[ind] = int(aktualne[co-1])
+                most_poll_v[ind] = city
 
             # countries by pollution per city
             if country not in AQI_in_countries:
@@ -88,26 +101,39 @@ def draw(co, minlat, minlng, maxlat, maxlng):
     for country in AQI_in_countries:
         average = AQI_in_countries[country] // stations_in_countries[country]
         average_AQI_in_country[country] = average
+
+    # spravi jeden zoznam z miest a hodnot namjmensieho znecistenia
     for i in range(len(least_poll)):
         least_pollutted_cities.append((least_poll[i], least_poll_v[i]))
-    #print(average_AQI_in_country)
     #sortne najmenej polluted cities
     least_pollutted_cities.sort()
+
+    # spravi jeden zoznam z miest a hodnot najvacsieho znecistenia
+    for i in range(len(least_poll)):
+        most_pollutted_cities.append((most_poll[i], most_poll_v[i]))
+    #sortne najviac polluted cities
+    most_pollutted_cities.sort(reverse=True)
+
+    #print(average_AQI_in_country)
     #print(stations_in_countries)
     #print(AQI_in_countries)
+
+    # vykresli mapu
     dokopy_stanic = 0
     for value in climate:
         dokopy_stanic += len(climate[value]['coords']) // 2
         plt.scatter(climate[value]['coords'][::2], climate[value]['coords'][1::2], color=climate[value]['color'], s=1, transform=ccrs.PlateCarree())
+
+    # vymaze Canvas
     cnv.delete("all")
-    posledne=0
-    x = 0
-    y = 150
+
     # kresli graf poctu stanic a legendu
+    posledne=0
+    y = 150
     for typ in climate:
         y+=15
         kolko = len(climate[typ]['coords'])//2
-        percenta=(len(climate[typ]['coords'])/2) / dokopy_stanic
+        percenta = (len(climate[typ]['coords'])/2) / dokopy_stanic
         if percenta == 1:
             cnv.create_oval(25, 25, 150, 150, fill=climate[typ]['color'], outline='')
             cnv.create_text(10, y, fill=climate[typ]['color'], text = 'Only Good' +': ' + str(kolko), anchor = 'w')
@@ -120,13 +146,14 @@ def draw(co, minlat, minlng, maxlat, maxlng):
         else:
             cnv.create_text(10, y, fill=climate[typ]['color'], text= typ + ': ' + str(kolko), anchor='w')
     y = 10
+    # kresli najmenej znecistene mesta nazvy
     for i in range(len(least_pollutted_cities)):
         y+=15
         cnv.create_text(200, y, fill='black', text=least_pollutted_cities[i][1] + ': ' + str(least_pollutted_cities[i][0]), anchor='w')
+        cnv.create_text(350, y, fill='black', text=most_pollutted_cities[i][1] + ': ' + str(most_pollutted_cities[i][0]), anchor='w')
 
-
+    # kresli mapu
     plt.show()
-    # kresli graf
 
 regions = {
     "World": (-90, -180, 90, 180),
@@ -137,6 +164,7 @@ regions = {
     "Asia": (5, 25, 80, 180),
     "Oceania": (-50, 110, 0, 180),
 }
+
 type = {
     "AQI_category":3,
     "CO_AQI_category":5,
@@ -147,7 +175,7 @@ type = {
 
 currentregion = "World"
 def spusti():
-    #zisti selktnuty index a povie aky region/krajina su oznacene
+    #zisti selktnuty index a povie aky region/krajina su oznacene, nasledne spusti funkciu an vykreslovanie
     index_region = lb.curselection()[0]
     currentregion = lb.get(index_region)
     typ = lb2.curselection()[0]
@@ -155,7 +183,7 @@ def spusti():
     draw(type[co], regions[currentregion][0], regions[currentregion][1], regions[currentregion][2],regions[currentregion][3])
 
 #spravi tlacidlo
-tkinter.Button(text='Pokus', command=spusti).grid(column=1, row=1)
+tkinter.Button(text='Kresli', command=spusti).grid(column=1, row=1)
 
 # spravi listbox a prida regiony
 lb = tkinter.Listbox(exportselection=False, selectmode='single', width=10,height=10)
@@ -166,9 +194,34 @@ lb.grid(column=0,row=0)
 lb2 = tkinter.Listbox(exportselection=False,selectmode='single', width=10,height=10)
 for typ in type:
     lb2.insert(tkinter.END, typ)
-lb2.grid(column=3,row=0)
+lb2.grid(column=0,row=1)
 
 lb.selection_set(0)   # vyberie "World"
 lb2.selection_set(0)  # vyberie prvý typ
 
+cnv2 = tkinter.Canvas(root, bg='white', width=300, height=100)
+cnv2.grid(column=2,row=1)
+
+def vyber(event):
+    vybrane = combobox.get()
+    cnv2.delete("all")
+    for riadok in udaje:
+        aktualne = riadok.split(',')
+        if aktualne[1] == vybrane:
+            y=0
+            for typ in type:
+                y += 15
+                print(str(aktualne[type[typ]]))
+                cnv2.create_text(0, y, fill='black',
+                                text=typ + ': ' + str(aktualne[type[typ]]) + ', value: ' + str(aktualne[type[typ]+1]), anchor='w')
+            break
+# vytvori databazu miest
+nazvy_miest = []
+for riadok in udaje:
+    aktualne = riadok.split(',')
+    nazvy_miest.append(aktualne[1])
+
+combobox = AutocompleteCombobox(root, completevalues=nazvy_miest)
+combobox.bind("<<ComboboxSelected>>", vyber)
+combobox.grid(column=2,row=0)
 cnv.mainloop()
