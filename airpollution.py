@@ -8,7 +8,7 @@ from ttkwidgets.autocomplete import AutocompleteCombobox
 
 root = tkinter.Tk()
 cnv = tkinter.Canvas(root, bg='white', width=500, height=300)
-cnv.grid(column=1,row=0)
+cnv.grid(column=1,row=0,rowspan=2)
 
 #country = aktualne[0]
 #city = aktualne[1]
@@ -55,7 +55,8 @@ def draw(co, minlat, minlng, maxlat, maxlng):
     stations_in_countries = {}
     AQI_in_countries = {}
     average_AQI_in_country = {}
-
+    value_for_avr = 0
+    number_of_values = 0
     for riadok in udaje:
         # udaje co potrebujeme
         aktualne = riadok.split(',')
@@ -70,37 +71,38 @@ def draw(co, minlat, minlng, maxlat, maxlng):
             climate[teraz]['coords'].append(lng)
             climate[teraz]['coords'].append(lat)
             # rata kolko stanic je v danej krajine
-            if country not in stations_in_countries:
-                stations_in_countries[country] = 1
-            elif country in stations_in_countries:
-                stations_in_countries[country] += 1
+            #if country not in stations_in_countries:
+               # stations_in_countries[country] = 1
+           # elif country in stations_in_countries:
+                #stations_in_countries[country] += 1
 
             # least polluted cities, vytvori zoznam desiatich miest a ich hodnot a nahradza ich ked maju mensie znecistenie
-            if len(least_poll) < 10:
+            if len(least_poll) < 10 and city not in least_poll_v:
                 least_poll.append(int(aktualne[co-1]))
                 least_poll_v.append(city)
-            elif int(aktualne[co-1]) < max(least_poll):
+            elif int(aktualne[co-1]) < max(least_poll) and city not in least_poll_v:
                 ind = least_poll.index(max(least_poll))
                 least_poll[ind] = int(aktualne[co-1])
                 least_poll_v[ind] = city
 
             # most polluted cities, vytvori zoznam desiatich miest a ich hodnot a nahradza ich ked maju vacsie znecistenie
-            if len(most_poll) < 10:
+            if len(most_poll) < 10 and city not in most_poll_v:
                 most_poll.append(int(aktualne[co-1]))
                 most_poll_v.append(city)
-            elif int(aktualne[co-1]) > min(most_poll):
+            elif int(aktualne[co-1]) > min(most_poll) and city not in most_poll_v:
                 ind = most_poll.index(min(most_poll))
                 most_poll[ind] = int(aktualne[co-1])
                 most_poll_v[ind] = city
-
+            value_for_avr += int(aktualne[co-1])
+            number_of_values += 1
             # countries by pollution per city
-            if country not in AQI_in_countries:
-                AQI_in_countries[country] = AQI_value
-            elif country in AQI_in_countries:
-                AQI_in_countries[country] += AQI_value
-    for country in AQI_in_countries:
-        average = AQI_in_countries[country] // stations_in_countries[country]
-        average_AQI_in_country[country] = average
+            #if country not in AQI_in_countries:
+                #AQI_in_countries[country] = AQI_value
+            #elif country in AQI_in_countries:
+               # AQI_in_countries[country] += AQI_value
+    #for country in AQI_in_countries:
+       # average = AQI_in_countries[country] // stations_in_countries[country]
+        #average_AQI_in_country[country] = average
 
     # spravi jeden zoznam z miest a hodnot namjmensieho znecistenia
     for i in range(len(least_poll)):
@@ -116,7 +118,7 @@ def draw(co, minlat, minlng, maxlat, maxlng):
 
     #print(average_AQI_in_country)
     #print(stations_in_countries)
-    #print(AQI_in_countries)
+   # print(AQI_in_countries)
 
     # vykresli mapu
     dokopy_stanic = 0
@@ -129,7 +131,7 @@ def draw(co, minlat, minlng, maxlat, maxlng):
 
     # kresli graf poctu stanic a legendu
     posledne=0
-    y = 150
+    y = 160
     for typ in climate:
         y+=15
         kolko = len(climate[typ]['coords'])//2
@@ -145,13 +147,16 @@ def draw(co, minlat, minlng, maxlat, maxlng):
             cnv.create_text(10, y, fill=climate[typ]['color'], text = 'Unhealthy for Senstive' +': ' + str(kolko), anchor = 'w')
         else:
             cnv.create_text(10, y, fill=climate[typ]['color'], text= typ + ': ' + str(kolko), anchor='w')
-    y = 10
+    y = 30
+    cnv.create_text(200, y-5, fill='black', text="Least polluted", anchor='w', font='bold')
+    cnv.create_text(350, y-5, fill='black', text="Most polluted", anchor='w', font='bold')
     # kresli najmenej znecistene mesta nazvy
     for i in range(len(least_pollutted_cities)):
         y+=15
         cnv.create_text(200, y, fill='black', text=least_pollutted_cities[i][1] + ': ' + str(least_pollutted_cities[i][0]), anchor='w')
         cnv.create_text(350, y, fill='black', text=most_pollutted_cities[i][1] + ': ' + str(most_pollutted_cities[i][0]), anchor='w')
-
+    average= int(value_for_avr)/ number_of_values
+    cnv.create_text(200, y+50, fill='black', text= 'Average value: ' + str(average), anchor='w')
     # kresli mapu
     plt.show()
 
@@ -163,14 +168,41 @@ regions = {
     "Africa": (-35, -20, 37, 52),
     "Asia": (5, 25, 80, 180),
     "Oceania": (-50, 110, 0, 180),
+    "Western Europe": (43, -10, 56, 15),
+    "Central Europe": (45, 5, 55, 25),
+    "Eastern Europe": (44, 20, 60, 45),
+    "Northern Europe": (54, -10, 72, 35),
+    "Southern Europe": (35, -10, 45, 30),
+    "Balkans": (37, 13, 47, 29),
+    "Scandinavia": (55, 5, 72, 32),
+    "USA West": (30, -125, 50, -105),
+    "USA East": (25, -105, 50, -65),
+    "Canada": (45, -140, 75, -50),
+    "Central America": (5, -95, 23, -75),
+    "Caribbean": (10, -85, 25, -60),
+    "South America North": (-5, -80, 15, -45),
+    "South America South": (-55, -75, -5, -35),
+    "North Africa": (15, -20, 37, 35),
+    "West Africa": (-5, -20, 20, 15),
+    "East Africa": (-12, 30, 15, 52),
+    "Central Africa": (-10, 10, 10, 35),
+    "Southern Africa": (-35, 10, -10, 40),
+    "Middle East": (12, 30, 40, 65),
+    "Central Asia": (35, 50, 55, 85),
+    "South Asia": (5, 65, 35, 95),
+    "East Asia": (20, 100, 50, 145),
+    "Southeast Asia": (-10, 95, 25, 135),
+    "China Region": (18, 73, 54, 135),
+    "Japan & Korea": (30, 120, 47, 150),
+    "Australia": (-45, 110, -10, 155),
 }
 
 type = {
-    "AQI_category":3,
-    "CO_AQI_category":5,
-    "Ozone_AQI_category":7,
-    "NO2_AQI_category":9,
-    "PM2_5_AQI_category":11
+    "AQI":3,
+    "CO":5,
+    "Ozone":7,
+    "NO2":9,
+    "PM2_5":11
 }
 
 currentregion = "World"
@@ -183,7 +215,7 @@ def spusti():
     draw(type[co], regions[currentregion][0], regions[currentregion][1], regions[currentregion][2],regions[currentregion][3])
 
 #spravi tlacidlo
-tkinter.Button(text='Kresli', command=spusti).grid(column=1, row=1)
+tkinter.Button(text='Kresli', command=spusti).grid(column=1, row=2)
 
 # spravi listbox a prida regiony
 lb = tkinter.Listbox(exportselection=False, selectmode='single', width=10,height=10)
@@ -191,7 +223,7 @@ for region in regions:
     lb.insert(tkinter.END, region)
 lb.grid(column=0,row=0)
 
-lb2 = tkinter.Listbox(exportselection=False,selectmode='single', width=10,height=10)
+lb2 = tkinter.Listbox(exportselection=False,selectmode='single', width=10,height=8)
 for typ in type:
     lb2.insert(tkinter.END, typ)
 lb2.grid(column=0,row=1)
@@ -200,7 +232,7 @@ lb.selection_set(0)   # vyberie "World"
 lb2.selection_set(0)  # vyberie prvý typ
 
 cnv2 = tkinter.Canvas(root, bg='white', width=300, height=100)
-cnv2.grid(column=2,row=1)
+cnv2.grid(column=2,row=1 ,sticky=tkinter.N)
 
 def vyber(event):
     vybrane = combobox.get()
@@ -223,5 +255,5 @@ for riadok in udaje:
 
 combobox = AutocompleteCombobox(root, completevalues=nazvy_miest)
 combobox.bind("<<ComboboxSelected>>", vyber)
-combobox.grid(column=2,row=0)
+combobox.grid(column=2,row=0, sticky=tkinter.S)
 cnv.mainloop()
