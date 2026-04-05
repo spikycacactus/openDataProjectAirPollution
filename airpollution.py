@@ -4,12 +4,18 @@ import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
 import cartopy.feature as cfeature
 import tkinter
+
+from matplotlib.pyplot import nipy_spectral
 from ttkwidgets.autocomplete import AutocompleteCombobox
 
 root = tkinter.Tk()
-cnv = tkinter.Canvas(root, bg='white', width=500, height=300)
-cnv.grid(column=1,row=0,rowspan=2)
+cnv = tkinter.Canvas(root, bg='white', width=550, height=300)
+cnv.grid(column=1,row=0,rowspan=2,columnspan=3)
 
+# fonty
+velmi_hruby = ("Arial", 12, 'bold')
+hruby = ("Arial", 10, 'bold')
+normalny = ("Arial", 10)
 #country = aktualne[0]
 #city = aktualne[1]
 #AQI_value = int(aktualne[2])
@@ -138,23 +144,23 @@ def draw(co, minlat, minlng, maxlat, maxlng):
         percenta = (len(climate[typ]['coords'])/2) / dokopy_stanic
         if percenta == 1:
             cnv.create_oval(25, 25, 150, 150, fill=climate[typ]['color'], outline='')
-            cnv.create_text(10, y, fill=climate[typ]['color'], text = 'Only Good' +': ' + str(kolko), anchor = 'w')
+            cnv.create_text(10, y, fill=climate[typ]['color'], text = 'Only Good' +': ' + str(kolko), anchor = 'w', font=normalny)
             return
         else:
             cnv.create_arc(25, 25, 150, 150, start=posledne, extent=percenta * 360, fill=climate[typ]['color'], outline="")
         posledne += percenta * 360
         if typ == 'Unhealthy for Sensitive Groups':
-            cnv.create_text(10, y, fill=climate[typ]['color'], text = 'Unhealthy for Senstive' +': ' + str(kolko), anchor = 'w')
+            cnv.create_text(10, y, fill=climate[typ]['color'], text = 'Unhealthy for Senstive' +': ' + str(kolko), anchor = 'w', font=normalny)
         else:
-            cnv.create_text(10, y, fill=climate[typ]['color'], text= typ + ': ' + str(kolko), anchor='w')
+            cnv.create_text(10, y, fill=climate[typ]['color'], text= typ + ': ' + str(kolko), anchor='w', font=normalny)
     y = 30
-    cnv.create_text(200, y-5, fill='black', text="Least polluted", anchor='w', font='bold')
-    cnv.create_text(350, y-5, fill='black', text="Most polluted", anchor='w', font='bold')
+    cnv.create_text(200, y-5, fill='black', text="Least polluted", anchor='w', font=hruby)
+    cnv.create_text(350, y-5, fill='black', text="Most polluted", anchor='w', font=hruby)
     # kresli najmenej znecistene mesta nazvy
     for i in range(len(least_pollutted_cities)):
         y+=15
-        cnv.create_text(200, y, fill='black', text=least_pollutted_cities[i][1] + ': ' + str(least_pollutted_cities[i][0]), anchor='w')
-        cnv.create_text(350, y, fill='black', text=most_pollutted_cities[i][1] + ': ' + str(most_pollutted_cities[i][0]), anchor='w')
+        cnv.create_text(200, y, fill='black', text=least_pollutted_cities[i][1] + ': ' + str(least_pollutted_cities[i][0]), anchor='w', font= normalny)
+        cnv.create_text(350, y, fill='black', text=most_pollutted_cities[i][1] + ': ' + str(most_pollutted_cities[i][0]), anchor='w', font = normalny)
     average= int(value_for_avr)/ number_of_values
     cnv.create_text(200, y+50, fill='black', text= 'Average value: ' + str(average), anchor='w')
     # kresli mapu
@@ -205,6 +211,41 @@ type = {
     "PM2_5":11
 }
 
+pomoc_text = [
+    'Pomoc',
+    '',
+    'Program slúži na vykresľovanie miest, ',
+    'v ktorých je stanica merajúca hodnoty znečistenia rôznych plynov.',
+    '',
+    'Na ľavo sú dva zoznamy:',
+    'v hornom vieme nastaviť región na vykreslenie',
+    'V spodnom plyn, ktorého údaje chceme zistiť. ',
+    '',
+    'Program spustíme tlačítkom Kresli, ktoré sa nachádza dole pod plátnom. ',
+    '',
+    '',
+    'Na pravej strane sa nachádza políčko na písanie,',
+    'kde vieme zistiť hodnoty jednotlivých plynov pre mesto nášho výberu.',
+    '',
+    'Na vypísanie musíme kliknúť na malú šípku vedľa vpisovacieho políčka ',
+    'a kliknúť na naše vybrané mesto.',
+]
+pomoc_text_bold = [2,5,9,12,15,16]
+def Pomoc():
+    cnv.delete("all")
+    y=15
+    i=0
+    for napisane in pomoc_text:
+        y+=15
+        if i == 0:
+            cnv.create_text(10, y, text=napisane, anchor="w", font=velmi_hruby)
+        elif i in pomoc_text_bold:
+            cnv.create_text(10, y, text=napisane, anchor="w", font=hruby)
+        else:
+            cnv.create_text(10, y, text=napisane,anchor="w", font=normalny)
+        i+=1
+
+Pomoc()
 currentregion = "World"
 def spusti():
     #zisti selktnuty index a povie aky region/krajina su oznacene, nasledne spusti funkciu an vykreslovanie
@@ -215,8 +256,8 @@ def spusti():
     draw(type[co], regions[currentregion][0], regions[currentregion][1], regions[currentregion][2],regions[currentregion][3])
 
 #spravi tlacidlo
-tkinter.Button(text='Kresli', command=spusti).grid(column=1, row=2)
-
+tkinter.Button(text='Kresli', command=spusti).grid(column=2, row=2)
+tkinter.Button(text='Pomoc', command=Pomoc).grid(column=3,row=2)
 # spravi listbox a prida regiony
 lb = tkinter.Listbox(exportselection=False, selectmode='single', width=10,height=10)
 for region in regions:
@@ -232,7 +273,7 @@ lb.selection_set(0)   # vyberie "World"
 lb2.selection_set(0)  # vyberie prvý typ
 
 cnv2 = tkinter.Canvas(root, bg='white', width=300, height=100)
-cnv2.grid(column=2,row=1 ,sticky=tkinter.N)
+cnv2.grid(column=5,row=1 ,sticky=tkinter.N)
 
 def vyber(event):
     vybrane = combobox.get()
@@ -255,5 +296,5 @@ for riadok in udaje:
 
 combobox = AutocompleteCombobox(root, completevalues=nazvy_miest)
 combobox.bind("<<ComboboxSelected>>", vyber)
-combobox.grid(column=2,row=0, sticky=tkinter.S)
+combobox.grid(column=5,row=0, sticky=tkinter.S)
 cnv.mainloop()
