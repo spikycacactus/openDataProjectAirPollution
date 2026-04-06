@@ -4,13 +4,14 @@ BOLD = ("Arial", 10, 'bold')
 NORMAL = ("Arial", 10)
 
 CLIMATE_COLORS = {
-        'Good': 'green',
-        'Moderate': 'orange',
-        'Unhealthy': 'red',
-        'Very Unhealthy': 'black',
-        'Unhealthy for Sensitive Groups': 'blue',
-        'Hazardous': 'purple'
+    'Good': 'green',
+    'Moderate': 'orange',
+    'Unhealthy': 'brown',
+    'Very Unhealthy': 'purple',
+    'Unhealthy for Sensitive Groups': 'red',
+    'Hazardous': 'black'
 }
+
 REGIONS = {
     "World": (-90, -180, 90, 180),
     "North America": (5, -170, 83, -50),
@@ -49,11 +50,11 @@ REGIONS = {
 }
 
 TYPES = {
-    "AQI":{"cislo":3, "popisok":"AQI (Air Quality Index) – celkový index kvality ovzdušia."},
-    "CO":{"cislo":5, "popisok":"CO (oxid uhoľnatý) – jedovatý plyn zo spaľovania, znižuje prenos kyslíka v krvi."},
-    "Ozone":{"cislo":7, "popisok":"O₃ (prízemný ozón) - škodlivý pre pľúca."},
-    "NO2":{"cislo":9, "popisok":"NO₂ (oxid dusičitý) – znečistenie z dopravy, dráždi dýchacie cesty."},
-    "PM2_5":{"cislo":11, "popisok":"Jemné prachové častice, prenikajú do pľúc."}
+    "AQI": {"number": 3, "description": "AQI (Air Quality Index) - hodnota najviac znečisťujúcej látky v ovzduší."},
+    "CO": {"number": 5, "description": "CO (oxid uhoľnatý) – jedovatý plyn zo spaľovania, znižuje prenos kyslíka v krvi."},
+    "Ozone": {"number": 7, "description": "O₃ (prízemný ozón) - vzniká reakciou znečisťujúcich plynov, škodlivý pre pľúca."},
+    "NO₂": {"number": 9, "description": "NO₂ (oxid dusičitý) – znečistenie z dopravy, dráždi dýchacie cesty."},
+    "PM2.5": {"number": 11, "description": "PM2.5 (Jemné prachové častice) - vznikajú najmä spalovaním, prenikajú do pľúc."}
 }
 
 HELP_TEXT = [
@@ -75,5 +76,4 @@ HELP_TEXT = [
     'Na vypísanie musíme kliknúť na malú šípku vedľa vpisovacieho políčka ',
     'a kliknúť na naše vybrané mesto.',
 ]
-# Kresli Pomoc text
 HELP_TEXT_BOLD = [2, 5, 9, 12, 15, 16]
